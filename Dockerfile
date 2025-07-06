@@ -1,5 +1,6 @@
 # Use Ubuntu 20.04 as base for better compatibility with robotics libraries
-FROM ubuntu:20.04
+# FROM ubuntu:20.04
+FROM ghcr.io/prefix-dev/pixi:0.41.1
 
 # Avoid interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -7,38 +8,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set timezone
 ENV TZ=UTC
 
-# Install minimal system dependencies
+# Install system dependencies including build tools for robotics packages
 RUN apt-get update && apt-get install -y \
-    git \
-    vim \
-    curl \
-    wget \
-    build-essential \
+    ca-certificates \
     cmake \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    ffmpeg \
-    libfontconfig1 \
-    libxrender1 \
-    libxtst6 \
-    libxi6 \
-    libxrandr2 \
-    libasound2 \
+    build-essential \
+    pkg-config \
+    libgl1-mesa-dev \
+    libegl1-mesa-dev \
+    libx11-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Install MuJoCo dependencies
-RUN apt-get update && apt-get install -y \
-    libglfw3-dev \
-    libglew-dev \
-    libosmesa6-dev \
-    patchelf \
-    && rm -rf /var/lib/apt/lists/*
-
-# pixi will manage all Python packages and dependencies
 
 # Set working directory
 WORKDIR /workspace
@@ -48,23 +27,8 @@ ENV CUDA_VISIBLE_DEVICES=0
 ENV MUJOCO_EGL_DEVICE_ID=0
 ENV PYOPENGL_PLATFORM=egl
 
-# Create a user to avoid running as root
-ARG USER_NAME=developer
-ARG USER_UID=1000
-ARG USER_GID=1000
+# Use existing ubuntu user from pixi base image
+USER ubuntu
+# Working directory will be set by docker run
 
-RUN groupadd -g ${USER_GID} ${USER_NAME} && \
-    useradd -m -u ${USER_UID} -g ${USER_GID} -s /bin/bash ${USER_NAME}
-
-# Switch to user and install pixi for the user
-USER ${USER_NAME}
-
-# Install pixi for the user
-RUN curl -fsSL https://pixi.sh/install.sh | sh
-
-# Add pixi to PATH and enable completion for the user
-RUN echo 'export PATH="$HOME/.pixi/bin:$PATH"' >> ~/.bashrc && \
-    echo 'eval "$(pixi completion -s bash)"' >> ~/.bashrc
-
-# Set default command
 CMD ["/bin/bash"] 

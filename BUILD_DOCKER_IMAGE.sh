@@ -21,15 +21,8 @@ echo "=========================================="
 echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
 echo "=========================================="
 
-# Get current user ID and group ID for non-root user creation
-USER_UID=$(id -u)
-USER_GID=$(id -g)
-
-# Build the Docker image
+# Build the Docker image (using existing ubuntu user)
 docker build \
-    --build-arg USER_NAME=${NAME} \
-    --build-arg USER_UID=${USER_UID} \
-    --build-arg USER_GID=${USER_GID} \
     -t ${IMAGE_NAME}:${IMAGE_TAG} \
     -f Dockerfile \
     .
