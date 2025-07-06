@@ -1,6 +1,6 @@
 [project]
 name = "flow_imitation"
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 version = "0.1.0"
 description = "Flow and diffusion-based policies for robotic imitation learning"
 authors = [
@@ -16,25 +16,14 @@ requires = ["hatchling"]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
 
+[tool.pixi.system-requirements]
+cuda = "12.4"
+
 [tool.pixi.pypi-dependencies]
 flow_imitation = { path = ".", editable = true }
-wandb = "==0.13.1"
-transformers = "==4.21.1"
-opencv-python = "==4.6.0.66"
-robomimic = "==0.2.0"
-einops = "==0.4.1"
-thop = "==0.1.1-2209072238"
-robosuite = "==1.4.0"
-bddl = "==1.0.1"
-gym = "==0.25.2"
 
 [tool.pixi.dependencies]
-python = "==3.8.13"
-numpy = "==1.22.4"
-matplotlib = "==3.5.3"
-hydra-core = "==1.2.0"
-future = "==0.18.2"
-cloudpickle = "==2.1.0"
-easydict = "==1.9"
+python = ">=3.10,<3.12"
+pytorch-gpu = "*"
 
 [tool.pixi.tasks]
