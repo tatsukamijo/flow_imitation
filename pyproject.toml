@@ -22,8 +22,23 @@ cuda = "12.4"
 [tool.pixi.pypi-dependencies]
 flow_imitation = { path = ".", editable = true }
 
+[tool.pixi.environments]
+lint = { features = ["lint"] }
+
+[tool.pixi.feature.lint.dependencies]
+ruff = "==0.9.6"
+typos = "==1.29.7"
+pre-commit = "==4.1.0"
+
+[tool.pixi.feature.lint.tasks]
+pre-commit-install = "pre-commit install"
+lint = "pre-commit run --all-files"
+format = "ruff format src/*"
+
 [tool.pixi.dependencies]
 python = ">=3.10,<3.12"
 pytorch-gpu = "*"
+pre-commit = ">=4.1.0,<5"
+git = ">=2.49.0,<3"
 
 [tool.pixi.tasks]
