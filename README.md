@@ -1,6 +1,6 @@
 # Flow Imitation Learning Project
 
-This project implements and compares flow-based and diffusion-based policies for robotic imitation learning using the LIBERO benchmark.
+This project implements and compares flow-based and diffusion-based policies for robotic imitation learning.
 
 ## Quick Start with Docker
 
@@ -38,30 +38,16 @@ The project uses [pixi](https://pixi.sh/) for package management. Once inside th
    pixi install  # Install all dependencies from pyproject.toml
    ```
 
-2. **Install LIBERO benchmark:**
-   ```bash
-   cd /workspace
-   git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
-   cd LIBERO
-   pixi run pip install -r requirements.txt
-   pixi run pip install -e .
-   ```
-
-3. **Download LIBERO datasets:**
-   ```bash
-   pixi run download-libero  # Use predefined pixi task
-   ```
-
-4. **Work on your flow_imitation project:**
+2. **Work on your flow_imitation project:**
    ```bash
    cd /workspace/flow_imitation
    pixi shell  # Enter pixi environment
    # Your code development here
    
    # Or use pixi tasks directly:
-   pixi run train    # Run training
-   pixi run eval     # Run evaluation
-   pixi run notebook # Start Jupyter Lab
+   pixi run train    # Run training (once implemented)
+   pixi run eval     # Run evaluation (once implemented)
+   pixi run notebook # Start Jupyter Lab (once configured)
    ```
 
 ### Using Pixi
@@ -106,11 +92,10 @@ flow_imitation/
 
 1. Implement flow-based policies using conditional flow matching
 2. Implement diffusion-based policies for comparison
-3. Integrate with LIBERO benchmark tasks
-4. Conduct comparative experiments
+3. Set up training and evaluation pipelines
+4. Conduct comparative experiments on robotic tasks
 
 ## Resources
 
-- [LIBERO Benchmark](https://github.com/Lifelong-Robot-Learning/LIBERO)
 - [X-IL: Exploring the Design Space of Imitation Learning Policies](https://arxiv.org/abs/2502.12330)
 - [FlowNav: Combining Flow Matching and Depth Priors for Efficient Navigation](https://arxiv.org/abs/2411.09524) 
