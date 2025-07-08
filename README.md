@@ -1,4 +1,4 @@
-# 🤖 Conditional Flow Matching Policies for Robotic Imitation (LeRobot Style)
+# 🤖 Flow Imitation Learning
 
 This project implements a **Conditional Flow Matching (CFM) based policy** in a **LeRobot-compatible style** for robotic imitation learning.
 
@@ -11,6 +11,21 @@ This project implements a **Conditional Flow Matching (CFM) based policy** in a 
 - `FlowSinusoidalPosEmb`: Sinusoidal positional embedding for time steps
 - `FlowConv1dBlock` / `FlowConditionalResidualBlock1d`: Building blocks for the UNet
 - Flow scheduler classes (`LinearFlowScheduler`, `VPFlowScheduler`): For time/weight sampling
+
+---
+
+## 🔎 CFM-based Policy vs. Diffusion Policy
+
+The table below highlights the key differences in methodology and implementation between the implemented CFM-based policy and the Diffusion Policy implemented in the [LeRobot](https://github.com/huggingface/lerobot) project.
+
+| Aspect         | Diffusion Policy (`modeling_diffusion.py`)         | Flow Policy (`modeling_flow.py`)                |
+|---------------|-----------------------------------------------------|-------------------------------------------------|
+| Scheduler     | DDPM/DDIM (from diffusers library)                  | Linear/VP (custom implementation)               |
+| Sampling      | Iterative denoising (DDPM/DDIM)                     | Vector field integration (Euler method)         |
+| Loss          | Reconstructs noise or clean trajectory              | Reconstructs the flow (vector field)            |
+| Time Param    | Discrete steps (integer timesteps)                  | Continuous value (uniform in [0, 1])            |
+| UNet Output   | Noise or trajectory (configurable)                  | Flow (vector field)                             |
+| Dependency    | Relies on diffusers                                 | Fully self-contained                            |
 
 ---
 
