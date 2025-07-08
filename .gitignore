@@ -1,3 +1,7 @@
+# LeRobot
+outputs/
+wandb/
+
 # pixi environments
 .pixi
 

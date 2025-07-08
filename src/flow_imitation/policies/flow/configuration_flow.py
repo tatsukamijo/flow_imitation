@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Configuration class for Conditional Flow Matching Policy (LeRobot形式)
+Configuration class for Conditional Flow Matching Policy
 """
 
 from dataclasses import dataclass, field
@@ -14,7 +14,7 @@ from lerobot.optim.schedulers import DiffuserSchedulerConfig
 @dataclass
 class FlowConfig(PreTrainedConfig):
     """
-    Configuration class for Conditional Flow Matching Policy (LeRobot形式)
+    Configuration class for Conditional Flow Matching Policy
 
     Args:
         n_obs_steps: Number of observation steps.
@@ -84,17 +84,14 @@ class FlowConfig(PreTrainedConfig):
 
     input_features: dict[str, object] = field(
         default_factory=dict
-    )  # 入力特徴量名→特徴量定義
+    )
     output_features: dict[str, object] = field(
         default_factory=dict
-    )  # 出力特徴量名→特徴量定義
-    action_feature: object = None  # アクション特徴量定義
-    robot_state_feature: object = None  # ロボット状態特徴量定義
-    env_state_feature: object | None = None  # 環境状態特徴量定義（任意）
+    )
 
     @property
     def image_features(self) -> dict[str, object]:
-        """画像特徴量名→特徴量定義 (input_featuresから自動構築)"""
+        """Return image feature definitions (auto-constructed from input_features)."""
         return {
             k: v
             for k, v in self.input_features.items()
@@ -103,7 +100,6 @@ class FlowConfig(PreTrainedConfig):
 
     def __post_init__(self):
         super().__post_init__()
-        # Input validation (not exhaustive)
         if not self.vision_backbone.startswith("resnet"):
             raise ValueError(
                 f"`vision_backbone` must be a ResNet variant. Got {self.vision_backbone}."
@@ -150,7 +146,7 @@ class FlowConfig(PreTrainedConfig):
         return None
 
     def validate_features(self) -> None:
-        if len(self.image_features) == 0 and self.env_state_feature is None:
+        if len(self.image_features) == 0 and getattr(self, 'env_state_feature', None) is None:
             raise ValueError(
                 "You must provide at least one image or the environment state among the inputs."
             )
@@ -165,7 +161,6 @@ class FlowConfig(PreTrainedConfig):
                         f"for `crop_shape` and {image_ft.shape} for "
                         f"`{key}`."
                     )
-        # Check that all input images have the same shape.
         if len(self.image_features) > 0:
             first_image_key, first_image_ft = next(iter(self.image_features.items()))
             for key, image_ft in self.image_features.items():

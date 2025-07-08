@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Conditional Flow Matching Policy (LeRobot形式) - Skeleton
+Conditional Flow Matching Policy (LeRobot style) - Skeleton
 """
 
 import math
@@ -13,7 +13,7 @@ from torch import Tensor, nn
 import einops
 
 from lerobot.constants import ACTION, OBS_ENV_STATE, OBS_IMAGES, OBS_STATE
-from flow_imitation.common.policies.flow.configuration_flow import FlowConfig
+from flow_imitation.policies.flow.configuration_flow import FlowConfig
 from lerobot.policies.normalize import Normalize, Unnormalize
 from lerobot.policies.pretrained import PreTrainedPolicy
 from lerobot.policies.utils import (
@@ -26,7 +26,7 @@ from lerobot.policies.utils import (
 
 class FlowPolicy(PreTrainedPolicy):
     """
-    Conditional Flow Matching Policy (LeRobot形式)
+    Conditional Flow Matching Policy
     """
 
     config_class = FlowConfig
@@ -44,6 +44,16 @@ class FlowPolicy(PreTrainedPolicy):
         """
         super().__init__(config)
         config.validate_features()
+        if config.robot_state_feature is None:
+            raise ValueError(
+                "robot_state_feature must be configured. Ensure 'observation.state' is in input_features "
+                "with FeatureType.STATE."
+            )
+        if config.action_feature is None:
+            raise ValueError(
+                "action_feature must be configured. Ensure 'action' is in output_features "
+                "with FeatureType.ACTION."
+            )
         self.config = config
         self.normalize_inputs = Normalize(
             config.input_features, config.normalization_mapping, dataset_stats
@@ -58,7 +68,8 @@ class FlowPolicy(PreTrainedPolicy):
         self.flow = FlowModel(config)
         self.reset()
 
-    def get_optim_params(self) -> dict:
+    def get_optim_params(self):
+        """Return the optimizer parameters."""
         return self.flow.parameters()
 
     def reset(self):
@@ -111,12 +122,12 @@ class FlowPolicy(PreTrainedPolicy):
         return loss, None
 
 
-# --- Flow scheduler (for t, a_t, b_t) ---
-def _make_flow_scheduler(name: str, **kwargs: dict):
+def _make_flow_scheduler(name: str, num_train_steps: int, **kwargs):
+    """Create a flow scheduler instance."""
     if name == "linear":
-        return LinearFlowScheduler(**kwargs)
+        return LinearFlowScheduler(num_train_steps=num_train_steps, **kwargs)
     elif name == "vp":
-        return VPFlowScheduler(**kwargs)
+        return VPFlowScheduler(num_train_steps=num_train_steps, **kwargs)
     else:
         raise ValueError(f"Unsupported flow scheduler type {name}")
 
@@ -153,7 +164,6 @@ class VPFlowScheduler:
         return torch.sqrt(1 - torch.exp(-self.beta_min * t))
 
 
-# --- Encoder/UNet/Block ---
 class FlowSpatialSoftmax(nn.Module):
     """Spatial Softmax for extracting keypoints from feature maps."""
 
@@ -181,7 +191,7 @@ class FlowSpatialSoftmax(nn.Module):
             features = self.nets(features)
         features = features.reshape(-1, self._in_h * self._in_w)
         attention = torch.nn.functional.softmax(features, dim=-1)
-        expected_xy = attention @ self.pos_grid
+        expected_xy = torch.matmul(attention, self.pos_grid)
         feature_keypoints = expected_xy.view(-1, self._out_c, 2)
         return feature_keypoints
 
@@ -293,7 +303,7 @@ class FlowSinusoidalPosEmb(nn.Module):
 
 
 class FlowConv1dBlock(nn.Module):
-    """Conv1d --> GroupNorm --> Mish"""
+    """Conv1d -> GroupNorm -> Mish activation."""
 
     def __init__(self, inp_channels, out_channels, kernel_size, n_groups=8):
         super().__init__()
@@ -435,7 +445,7 @@ class FlowConditionalUnet1d(nn.Module):
         x = einops.rearrange(x, "b t d -> b d t")
         timesteps_embed = self.diffusion_step_encoder(timestep)
         if global_cond is not None:
-            global_feature = torch.cat([timesteps_embed, global_cond], axis=-1)
+            global_feature = torch.cat([timesteps_embed, global_cond], dim=-1)
         else:
             global_feature = timesteps_embed
         encoder_skip_features: list[Tensor] = []
@@ -456,7 +466,6 @@ class FlowConditionalUnet1d(nn.Module):
         return x
 
 
-# --- FlowModel ---
 class FlowModel(nn.Module):
     def __init__(self, config: FlowConfig):
         super().__init__()
@@ -500,7 +509,6 @@ class FlowModel(nn.Module):
             generator=generator,
         )
         t = self.flow_scheduler.sample_t(batch_size, device)
-        # ODE integration (Euler, for simplicity)
         x = x0
         dt = 1.0 / self.num_inference_steps
         for _ in range(self.num_inference_steps):
@@ -564,17 +572,13 @@ class FlowModel(nn.Module):
         assert horizon == self.config.horizon
         assert n_obs_steps == self.config.n_obs_steps
         global_cond = self._prepare_global_conditioning(batch)
-        # CFM: sample t, a_t, b_t
         batch_size = batch["action"].shape[0]
         t = self.flow_scheduler.sample_t(batch_size, batch["action"].device)
         a_t = self.flow_scheduler.a_t(t).view(-1, 1, 1)
         b_t = self.flow_scheduler.b_t(t).view(-1, 1, 1)
-        # x0: ランダムサンプル, x1: データセットサンプル
         x1 = batch["action"]
         x0 = torch.randn_like(x1)
         xt = a_t * x1 + b_t * x0
-        # 速度ターゲット: v_target = (x1 - x0) * a_t' + (x0 - x1) * b_t'
-        # ここでは単純な線形補間の速度を使う（理論に応じて修正可）
         v_target = (x1 - x0) * a_t + (x0 - x1) * b_t
         v_pred = self.unet(xt, t, global_cond=global_cond)
         loss = torch.nn.functional.mse_loss(v_pred, v_target, reduction="mean")
