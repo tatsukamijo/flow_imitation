@@ -4,6 +4,7 @@ policy:
   horizon: 16
   n_action_steps: 8
   repo_id: "lerobot/pusht"
+  push_to_hub: false
 
 dataset:
   repo_id: "lerobot/pusht"
@@ -15,5 +16,5 @@ steps: 100000
 job_name: "flow_pusht"
 
 wandb:
-  enable: "false"
-  project: "flow_pusht"
+  enable: "true"
+  project: "flow_diffusion_pusht"
