@@ -1,4 +1,4 @@
-# 🤖 Flow Imitation Learning
+# 🤖 Conditional Flow Matching Policies for Robotic Imitation (LeRobot Style)
 
 This project implements a **Conditional Flow Matching (CFM) based policy** in a **LeRobot-compatible style** for robotic imitation learning.
 
