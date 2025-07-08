@@ -57,25 +57,19 @@ The project uses [pixi](https://pixi.sh/) for package management. Once inside th
    pixi install  # Install all dependencies
    ```
 
-2. **Enter the virtual environment:**
-   ```bash
-   cd /workspace/flow_imitation
-   pixi shell  # Enter pixi environment
-   ```
-
-3. **Run training:**
+2. **Run training:**
 
    - 🌀 **Train Flow Policy**
      ```bash
      pixi run train_flow_pusht
      ```
-     _Runs: `python -m scripts.train --config_path configs/flow_pusht.yaml`_ inside the pixi  environment
+     _Runs: `pixi shell && python -m scripts.train --config_path configs/flow_pusht.yaml`_ 
 
    - 💨 **Train Diffusion Policy**
      ```bash
      pixi run train_dp_pusht
      ```
-     _Runs: `python -m scripts.train --config_path configs/dp_pusht.yaml`_ inside the pixi environment
+     _Runs: `pixi shell && python -m scripts.train --config_path configs/dp_pusht.yaml`_ 
 
 ---
 
@@ -91,7 +85,6 @@ The project uses [pixi](https://pixi.sh/) for package management. Once inside th
 
 - 🌀 `train_flow_pusht`: Train the flow-based policy on the pusht dataset
 - 💨 `train_dp_pusht`: Train the diffusion-based policy on the pusht dataset
-- 📝 `notebook`: Start Jupyter Lab (if configured)
 
 ---
 
