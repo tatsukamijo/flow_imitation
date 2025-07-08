@@ -1,17 +1,29 @@
-# Flow Imitation Learning Project
+# 🤖 Flow Imitation Learning
 
-This project implements and compares flow-based and diffusion-based policies for robotic imitation learning.
+This project implements a **Conditional Flow Matching (CFM) based policy** in a **LeRobot-compatible style** for robotic imitation learning.
 
-## Quick Start with Docker
+### 🧩 Main Components of the CFM Implementation
+- `FlowPolicy`: High-level policy wrapper, normalization, and rollout logic
+- `FlowModel`: Core model logic, loss computation, and action generation
+- `FlowConditionalUnet1d`: 1D conditional UNet for sequence modeling
+- `FlowRgbEncoder`: Image encoder (ResNet + SpatialSoftmax)
+- `FlowSpatialSoftmax`: Keypoint extraction from feature maps
+- `FlowSinusoidalPosEmb`: Sinusoidal positional embedding for time steps
+- `FlowConv1dBlock` / `FlowConditionalResidualBlock1d`: Building blocks for the UNet
+- Flow scheduler classes (`LinearFlowScheduler`, `VPFlowScheduler`): For time/weight sampling
 
-### Prerequisites
-- Docker installed on your system
-- NVIDIA Docker runtime (for GPU support)
-- Linux environment
+---
 
-### Setup Development Environment
+## 🚀 Quick Start with Docker
 
-0. **Setup submodule:**
+### 🛠️ Prerequisites
+- 🐳 Docker installed on your system
+- ⚡ NVIDIA Docker runtime (for GPU support)
+- 🐧 Linux environment
+
+### 🏗️ Setup Development Environment
+
+0. **Initialize submodules:**
    ```bash
    git submodule update --init --recursive
    ```
@@ -19,88 +31,85 @@ This project implements and compares flow-based and diffusion-based policies for
 1. **Build the Docker image:**
    ```bash
    chmod +x BUILD_DOCKER_IMAGE.sh RUN_DOCKER_CONTAINER.sh
-   ./BUILD_DOCKER_IMAGE.sh kamijo
+   ./BUILD_DOCKER_IMAGE.sh <YOUR_NAME>
    ```
 
 2. **Run the Docker container:**
    ```bash
-   ./RUN_DOCKER_CONTAINER.sh kamijo
+   ./RUN_DOCKER_CONTAINER.sh <YOUR_NAME>
    ```
 
 The container will:
-- Mount the current directory to `/workspace/flow_imitation`
-- Set up GPU support (if available)
-- Configure environment variables for CUDA and MuJoCo
-- Provide X11 forwarding for GUI applications
+- 📂 Mount the current directory to `/workspace/flow_imitation`
+- 🖥️ Set up GPU support (if available)
+- ⚙️ Configure environment variables for CUDA and MuJoCo
+- 🖼️ Provide X11 forwarding for GUI applications
 
-### Development Workflow
+---
+
+## 🧑‍💻 Development Workflow
 
 The project uses [pixi](https://pixi.sh/) for package management. Once inside the container:
 
 1. **Install project dependencies:**
    ```bash
    cd /workspace/flow_imitation
-   pixi install  # Install all dependencies from pyproject.toml
+   pixi install  # Install all dependencies
    ```
 
-2. **Work on your flow_imitation project:**
+2. **Enter the virtual environment:**
    ```bash
    cd /workspace/flow_imitation
    pixi shell  # Enter pixi environment
-   # Your code development here
-   
-   # Or use pixi tasks directly:
-   pixi run train    # Run training (once implemented)
-   pixi run eval     # Run evaluation (once implemented)
-   pixi run notebook # Start Jupyter Lab (once configured)
    ```
 
-### Using Pixi
+3. **Run training:**
 
-- **Add new dependencies:** `pixi add package_name`
-- **Add PyPI packages:** `pixi add --pypi package_name`
-- **Run commands:** `pixi run command`
-- **Enter environment:** `pixi shell`
-- **List tasks:** `pixi task list`
+   - 🌀 **Train Flow Policy**
+     ```bash
+     pixi run train_flow_pusht
+     ```
+     _Runs: `python -m scripts.train --config_path configs/flow_pusht.yaml`_ inside the pixi  environment
 
-### Container Management
+   - 💨 **Train Diffusion Policy**
+     ```bash
+     pixi run train_dp_pusht
+     ```
+     _Runs: `python -m scripts.train --config_path configs/dp_pusht.yaml`_ inside the pixi environment
 
-- **Restart existing container:**
+---
+
+## 🧰 Using Pixi
+
+- ➕ **Add new dependencies:** `pixi add package_name`
+- 🐍 **Add PyPI packages:** `pixi add --pypi package_name`
+- ▶️ **Run commands:** `pixi run <task>`
+- 🐚 **Enter environment:** `pixi shell`
+- 📋 **List tasks:** `pixi task list`
+
+### 🎯 Defined Tasks
+
+- 🌀 `train_flow_pusht`: Train the flow-based policy on the pusht dataset
+- 💨 `train_dp_pusht`: Train the diffusion-based policy on the pusht dataset
+- 📝 `notebook`: Start Jupyter Lab (if configured)
+
+---
+
+## 🐳 Container Management
+
+- 🔄 **Restart existing container:**
   ```bash
   docker start -i flow_imitation_kamijo_container
   ```
 
-- **Stop container:**
+- ⏹️ **Stop container:**
   ```bash
   docker stop flow_imitation_kamijo_container
   ```
 
-- **Remove container:**
+- 🗑️ **Remove container:**
   ```bash
   docker rm flow_imitation_kamijo_container
   ```
 
-## Project Structure
-
-```
-flow_imitation/
-├── src/
-│   └── flow_imitation/
-├── Dockerfile
-├── BUILD_DOCKER_IMAGE.sh
-├── RUN_DOCKER_CONTAINER.sh
-├── pyproject.toml
-└── README.md
-```
-
-## Next Steps
-
-1. Implement flow-based policies using conditional flow matching
-2. Implement diffusion-based policies for comparison
-3. Set up training and evaluation pipelines
-4. Conduct comparative experiments on robotic tasks
-
-## Resources
-
-- [X-IL: Exploring the Design Space of Imitation Learning Policies](https://arxiv.org/abs/2502.12330)
-- [FlowNav: Combining Flow Matching and Depth Priors for Efficient Navigation](https://arxiv.org/abs/2411.09524) 
+---
