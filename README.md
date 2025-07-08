@@ -11,6 +11,11 @@ This project implements and compares flow-based and diffusion-based policies for
 
 ### Setup Development Environment
 
+0. **Setup submodule:**
+   ```bash
+   git submodule update --init --recursive
+   ```
+
 1. **Build the Docker image:**
    ```bash
    chmod +x BUILD_DOCKER_IMAGE.sh RUN_DOCKER_CONTAINER.sh
